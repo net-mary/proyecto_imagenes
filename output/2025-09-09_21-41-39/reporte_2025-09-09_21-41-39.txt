@@ -1,0 +1,46 @@
+
+--- REPORTE DE ANÁLISIS EmoKids ---
+Fecha y Hora: 2025-09-09 21:41:43
+ID del Análisis: 2025-09-09_21-41-39
+
+> Datos del Niño/a:
+Nombre: gael
+Contexto de la Situación: no quiere ir al colegio
+Condición de Comunicación: TDHA
+
+--- RESUMEN DEL ANÁLISIS ---
+Emoción Dominante: Neutro (40.0% del tiempo)
+Fotogramas Analizados: 498
+Confianza Promedio del Análisis: 0.8%
+
+--- HISTOGRAMA EMOCIONAL ---
+Neutro: 40.0%
+Enojado: 10.0%
+Sorprendido: 20.0%
+Temeroso: 10.0%
+Triste: 20.0%
+
+--- RECOMENDACIONES PERSONALIZADAS ---
+--- Consejos Fundamentales ---
+Título: Manejo del Entorno
+Consejo: Minimiza las distracciones en el entorno. Un espacio tranquilo y ordenado puede ayudar a mantener la concentración.
+
+Título: Instrucciones Simples
+Consejo: Divide las tareas grandes en pasos más pequeños. Da una instrucción a la vez y espera a que la complete antes de dar la siguiente.
+
+--- Consejos de la IA de Gemini ---
+Título: Error al generar recomendaciones
+Consejo: No pudimos generar recomendaciones personalizadas. Por favor, inténtalo de nuevo más tarde.
+
+
+--- FOTOGRAMAS CLAVE ---
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-40_Neutro.jpg - Emoción: Neutro - Tiempo: 21-41-40
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-40_Neutro.jpg - Emoción: Neutro - Tiempo: 21-41-40
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-40_Enojado.jpg - Emoción: Enojado - Tiempo: 21-41-40
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-40_Sorprendido.jpg - Emoción: Sorprendido - Tiempo: 21-41-40
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-40_Neutro.jpg - Emoción: Neutro - Tiempo: 21-41-40
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-40_Temeroso.jpg - Emoción: Temeroso - Tiempo: 21-41-40
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-41_Sorprendido.jpg - Emoción: Sorprendido - Tiempo: 21-41-41
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-41_Triste.jpg - Emoción: Triste - Tiempo: 21-41-41
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-41_Triste.jpg - Emoción: Triste - Tiempo: 21-41-41
+Fotograma: /output/2025-09-09_21-41-39/frame_21-41-41_Neutro.jpg - Emoción: Neutro - Tiempo: 21-41-41

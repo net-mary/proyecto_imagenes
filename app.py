@@ -80,6 +80,34 @@ def get_recommendations_from_gemini(emotion, context, condition):
             "text": "No pudimos generar recomendaciones personalizadas. Por favor, inténtalo de nuevo más tarde."
         }]
 
+def get_basic_recommendations(condition):
+    """
+    Proporciona recomendaciones básicas predefinidas según la condición.
+    """
+    recs = {
+        'TEA': [
+            {"title": "Comunicación Clara", "text": "Utiliza frases cortas y claras. Apoya tus palabras con gestos o imágenes para reducir la ambigüedad."},
+            {"title": "Establece una Rutina", "text": "La previsibilidad ayuda a los niños con TEA. Mantén rutinas diarias para que sepan qué esperar, lo que reduce la ansiedad."}
+        ],
+        'TDHA': [
+            {"title": "Manejo del Entorno", "text": "Minimiza las distracciones en el entorno. Un espacio tranquilo y ordenado puede ayudar a mantener la concentración."},
+            {"title": "Instrucciones Simples", "text": "Divide las tareas grandes en pasos más pequeños. Da una instrucción a la vez y espera a que la complete antes de dar la siguiente."}
+        ],
+        'ParalisisCerebral': [
+            {"title": "Crea un Ambiente Seguro", "text": "Asegura el entorno para evitar caídas. Usa mobiliario adaptado para mayor seguridad."},
+            {"title": "Fomenta la Movilidad", "text": "Utiliza juguetes que animen el movimiento y la coordinación. Trabaja en la fuerza muscular y la flexibilidad con ejercicios simples."}
+        ],
+        'RetrasoMadurativo': [
+            {"title": "Estimulación Cognitiva", "text": "Juega con el niño para estimular sus sentidos. Anímalo a resolver problemas sencillos y a participar en actividades motoras finas."},
+            {"title": "Refuerzo Positivo", "text": "Reconoce y celebra los logros del niño, sin importar lo pequeños que sean. El refuerzo positivo aumenta la confianza y el deseo de aprender."}
+        ],
+        'Otro': [
+            {"title": "Observación y Registro", "text": "Observa con atención cómo reacciona el niño a diferentes estímulos y situaciones. Lleva un registro de los comportamientos para encontrar patrones."},
+            {"title": "Colaboración con Especialistas", "text": "Consulta a un profesional de la salud o educador. Ellos pueden proporcionar herramientas y estrategias adaptadas al niño."}
+        ]
+    }
+    return recs.get(condition, [])
+
 def predict_emotion_simulated(face_image):
     """Simula la predicción de emociones."""
     emotions = ['happy', 'sad', 'angry', 'neutral', 'surprise', 'disgust', 'fear']
@@ -182,8 +210,12 @@ def analyze_video():
         dominant_percentage = 100
         avg_confidence = 0
     
-    # Generar recomendaciones con la API real de Gemini
-    recommendations = get_recommendations_from_gemini(dominant_emotion, situation, condition)
+    # Obtener recomendaciones básicas y las de Gemini
+    basic_recommendations = get_basic_recommendations(condition)
+    gemini_recommendations = get_recommendations_from_gemini(dominant_emotion, situation, condition)
+    
+    # Combinar ambas listas de recomendaciones
+    all_recommendations = basic_recommendations + gemini_recommendations
 
     # Crear el reporte en formato TXT
     report_data = f"""
@@ -208,9 +240,23 @@ Confianza Promedio del Análisis: {avg_confidence:.1f}%
         report_data += f"{EMOTION_MAP[emotion]}: {percentage:.1f}%\n"
 
     report_data += "\n--- RECOMENDACIONES PERSONALIZADAS ---\n"
-    for rec in recommendations:
-        report_data += f"Título: {rec.get('title', 'N/A')}\n"
-        report_data += f"Consejo: {rec.get('text', 'N/A')}\n\n"
+    # Añadir recomendaciones básicas al reporte
+    report_data += "--- Consejos Fundamentales ---\n"
+    if basic_recommendations:
+        for rec in basic_recommendations:
+            report_data += f"Título: {rec.get('title', 'N/A')}\n"
+            report_data += f"Consejo: {rec.get('text', 'N/A')}\n\n"
+    else:
+        report_data += "No se encontraron consejos fundamentales para esta condición.\n\n"
+
+    # Añadir recomendaciones de Gemini al reporte
+    report_data += "--- Consejos de la IA de Gemini ---\n"
+    if gemini_recommendations:
+        for rec in gemini_recommendations:
+            report_data += f"Título: {rec.get('title', 'N/A')}\n"
+            report_data += f"Consejo: {rec.get('text', 'N/A')}\n\n"
+    else:
+        report_data += "No se pudieron generar recomendaciones personalizadas.\n\n"
 
     report_data += "\n--- FOTOGRAMAS CLAVE ---\n"
     for frame in captured_frames:
@@ -232,7 +278,7 @@ Confianza Promedio del Análisis: {avg_confidence:.1f}%
         'emotion_histogram': {EMOTION_MAP[e]: v for e, v in emotion_histogram.items()},
         'emotion_map': EMOTION_MAP,
         'frames': captured_frames,
-        'recommendations': recommendations,
+        'recommendations': all_recommendations,
         'report_id': analysis_dir_name, # Usamos el nombre de la carpeta como ID
     })
 
