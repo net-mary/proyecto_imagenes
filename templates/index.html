@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎥 EmoKids - Analizador de Comunicación</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="hero">
+        <div class="container">
+            <h1>Herramienta EmoKids</h1>
+            <p>Análisis de emociones para apoyar la comunicación en niños</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Paso 1: Sube un Video</h2>
+            <p>Carga un archivo de video para comenzar el análisis.</p>
+            <div class="file-drop-area">
+                <span class="fake-btn" id="selectFileBtn">Seleccionar Video</span>
+                <span class="file-msg">o arrastra y suelta tu archivo aquí</span>
+                <input class="file-input" type="file" id="videoFile" accept="video/*">
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Paso 2: Describe la Situación</h2>
+            <p>Ingresa información clave para recomendaciones más precisas.</p>
+            <form id="contextForm">
+                <div class="form-group">
+                    <label for="childName">Nombre del Niño:</label>
+                    <input type="text" id="childName" required>
+                </div>
+                <div class="form-group">
+                    <label for="situation">Contexto de la situación:</label>
+                    <textarea id="situation" rows="3" placeholder="Ej. 'Durante el juego', 'hora de la comida', 'al interactuar con otros niños'..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="condition">Condición de Comunicación:</label>
+                    <select id="condition" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="TEA">Trastorno del Espectro Autista (TEA)</option>
+                        <option value="TDHA">Trastorno por Déficit de Atención (TDAH)</option>
+                        <option value="ParalisisCerebral">Parálisis Cerebral</option>
+                        <option value="RetrasoMadurativo">Retraso Madurativo</option>
+                        <option value="Otro">Otro (Especificar)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="button">Iniciar Análisis</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="resultsSection" class="card hidden">
+            <div id="loadingMessage" class="loading-message">
+                <div class="spinner"></div>
+                <p>Analizando el video... Esto puede tomar unos minutos.</p>
+            </div>
+
+            <div id="contentResults" class="hidden">
+                <h2>Resultados del Análisis</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>🎭 Emoción Dominante</h3>
+                        <div id="dominantEmotionIcon">...</div>
+                        <h4 id="dominantEmotion">...</h4>
+                        <p id="dominantPercentage">...</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>📊 Fotogramas Analizados</h3>
+                        <div id="totalFrames">...</div>
+                        <p>Total de fotogramas procesados</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>🎯 Precisión Promedio</h3>
+                        <div id="avgConfidence">...</div>
+                        <p>Confianza del modelo</p>
+                    </div>
+                </div>
+
+                <h3>Historial Emocional</h3>
+                <div class="chart-container">
+                    <canvas id="emotionChart"></canvas>
+                </div>
+                
+                <h3>Recomendaciones Personalizadas</h3>
+                <div id="recommendationsList" class="recommendations">
+                    <p>Cargando recomendaciones...</p>
+                </div>
+                
+                <h3>Momentos Clave</h3>
+                <div id="framesGallery" class="frames-gallery">
+                    <p>Los fotogramas se mostrarán aquí...</p>
+                </div>
+
+                <button class="button download-button" id="downloadReportBtn">Descargar Reporte Completo</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 EmoKids. Apoyo a la comunicación.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const dropArea = document.querySelector('.file-drop-area');
+        const fileInput = document.getElementById('videoFile');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const fileMsg = document.querySelector('.file-msg');
+        const form = document.getElementById('contextForm');
+        const resultsSection = document.getElementById('resultsSection');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const contentResults = document.getElementById('contentResults');
+        const recommendationsList = document.getElementById('recommendationsList');
+        const framesGallery = document.getElementById('framesGallery');
+        const downloadReportBtn = document.getElementById('downloadReportBtn');
+
+        let myChart;
+
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('is-active');
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            dropArea.addEventListener(event, () => dropArea.classList.remove('is-active'));
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileInput.files = e.dataTransfer.files;
+            handleFile();
+        });
+
+        fileInput.addEventListener('change', handleFile);
+
+        function handleFile() {
+            const fileName = fileInput.files[0].name;
+            fileMsg.textContent = fileName;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Por favor, selecciona un video primero.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('name', document.getElementById('childName').value);
+            formData.append('situation', document.getElementById('situation').value);
+            formData.append('condition', document.getElementById('condition').value);
+
+            resultsSection.classList.remove('hidden');
+            loadingMessage.classList.remove('hidden');
+            contentResults.classList.add('hidden');
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                loadingMessage.classList.add('hidden');
+                contentResults.classList.remove('hidden');
+                updateUI(result);
+            } catch (error) {
+                console.error('Error en el análisis:', error);
+                loadingMessage.classList.add('hidden');
+                recommendationsList.innerHTML = `<p style="color:red;">Ocurrió un error. Por favor, inténtalo de nuevo. Detalle: ${error.message}</p>`;
+            }
+        });
+
+        function updateUI(data) {
+            document.getElementById('dominantEmotion').textContent = data.dominant_emotion.emotion_es;
+            document.getElementById('dominantEmotionIcon').textContent = data.dominant_emotion.icon;
+            document.getElementById('dominantPercentage').textContent = `${data.dominant_emotion.percentage.toFixed(1)}% del tiempo`;
+            document.getElementById('totalFrames').textContent = data.total_frames;
+            document.getElementById('avgConfidence').textContent = `${data.avg_confidence.toFixed(1)}%`;
+
+            const ctx = document.getElementById('emotionChart').getContext('2d');
+            if (myChart) myChart.destroy();
+
+            const emotionLabels = Object.keys(data.emotion_histogram);
+            const emotionData = Object.values(data.emotion_histogram);
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: emotionLabels,
+                    datasets: [{
+                        label: 'Distribución Emocional',
+                        data: emotionData,
+                        backgroundColor: ['#667eea', '#ffc107', '#17a2b8', '#28a745', '#dc3545', '#fd7e14', '#6f42c1'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Porcentaje de tiempo (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            framesGallery.innerHTML = '';
+            data.frames.forEach(frame => {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'frame-item';
+                imgContainer.innerHTML = `
+                    <img src="${frame.image_url}" alt="${frame.emotion}">
+                    <div class="frame-label">
+                        <span class="emotion-tag">${frame.emotion_es}</span>
+                        <span class="timestamp">${frame.timestamp}</span>
+                    </div>
+                `;
+                framesGallery.appendChild(imgContainer);
+            });
+
+            recommendationsList.innerHTML = '';
+            data.recommendations.forEach(rec => {
+                const recItem = document.createElement('div');
+                recItem.className = 'recommendation-item';
+                recItem.innerHTML = `
+                    <h3>${rec.title}</h3>
+                    <p>${rec.text}</p>
+                `;
+                recommendationsList.appendChild(recItem);
+            });
+
+            downloadReportBtn.style.display = 'block';
+            downloadReportBtn.onclick = () => {
+                window.location.href = `/report/${data.report_id}`;
+            };
+        }
+    </script>
+</body>
+</html>
